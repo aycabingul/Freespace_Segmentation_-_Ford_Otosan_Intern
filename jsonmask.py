@@ -55,24 +55,17 @@ for json_obj in json_objs:#json_objs listesinin içindeki her listeye ulaşmak i
 #peş peşe aynı indexleri yazdırmış olduk
 #peş peşe aynı index olan indexleri buldum 
 #bunları bir listeye atadım
-for i in range(4768):
+for i in range(4767):#4768 tane list_id içinde eleman var ama 0.indexden başladığı için 4767 alıyorum
     if(list_id[i]==list_id[i+1]):
         two_fs.append(list_id[i])
 
 two_point=[]
-# iki tane freespace bulup, ilk freespace'leri obj_point listesinden silip
+# iki tane freespace'de ilkini bulup, ilk freespace'leri obj_point listesinden silip
 #başka bir listeye exterior'larını kaydettim
 for fs in two_fs:
-    a=0
-    two_point.append(point_list[fs+a])
-    del point_list[fs+a]
-    a=a+1
-#ilk başta bizim listemizde freespace sırayla yazılıyordu ama iki tane freespace olduğu zaman 
-#liste her seferinde bir index ileri haydığı için fs+s aldım
-#ilk iki freespace ait index 91 ozaman ikinci freespace 92 yazılmıştır
-#ama 3011 deki freespaceler ise 3012 ve 3013 yazılmıştır 
-
-
+    two_point.append(point_list[fs])
+    del point_list[fs]
+two_fs
     
 img_height = json_dict["size"]["height"]
 img_width  = json_dict["size"]["width"]
