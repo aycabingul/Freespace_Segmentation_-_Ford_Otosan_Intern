@@ -6,18 +6,17 @@ Created on Fri Sep  4 02:25:33 2020
 """
 #kütüphaneleri import ettik 
 import numpy as np
-import pandas as pd
 import cv2
 import json
 import os
 
 #mask_dir'e mask dosyasının dosya yolunu yazdık
-MASK_DIR  = 'D:/Belgeler/ders/jsonandmask/L4 Images/2020_02_22_FC120/masks'
+MASK_DIR  = 'C:/Users/aycaburcu/Desktop/Ford_Otosan_Intern/L4 Images/2020_02_22_FC120/masks'
 if not os.path.exists(MASK_DIR):#böyle bir dosya yolunda dosya yoksa 
     os.mkdir(MASK_DIR)#böyle bir dosya yolu olan dosya oluşturuyor
 
 
-os.chdir('D:/Belgeler/ders/jsonandmask/L4 Images/2020_02_22_FC120/ann')#geçerli çalışma dizinini verilen yola değiştirir
+os.chdir('C:/Users/aycaburcu/Desktop/Ford_Otosan_Intern/L4 Images/2020_02_22_FC120/ann')#geçerli çalışma dizinini verilen yola değiştirir
 jsons=os.listdir()#ann klasörü içindeki json dosyalarının isimleriyle liste oluşturuldu
 
 a=0
@@ -25,7 +24,7 @@ json_objs=[]
 json_dicts=[]
 
 for i in jsons:#json listesinin içindeki elemanlara ulaşıldı
-    JSON_DIR = 'D:/Belgeler/ders/jsonandmask/L4 Images/2020_02_22_FC120/ann'#dosyanın yolu değişkene atandı
+    JSON_DIR = 'C:/Users/aycaburcu/Desktop/Ford_Otosan_Intern/L4 Images/2020_02_22_FC120/ann'#dosyanın yolu değişkene atandı
     json_name = i#jsons listesindeki her eleman değişkene atandı
     json_path = os.path.join(JSON_DIR, json_name)#okunacak dosya yolu birleştirildi
     json_file = open(json_path, 'r')#dosya okuma işlemi
@@ -78,7 +77,7 @@ print(two_fs)
 two_fs_files=[]
 for i in two_fs:
     two_fs_files.append(jsons[i])
-print("\nBirden fazla fs içeren dosyalar: ", two_fs_files)
+print("/nBirden fazla fs içeren dosyalar: ", two_fs_files)
 masks=(np.zeros(img_size, dtype=np.uint8))#boş bir maske oluşturduk 
 
 results=[]
@@ -95,7 +94,7 @@ for point in two_point:
     # result'ı güncelledim
     results[two_fs[c]]=(cv2.fillPoly(mask, np.array([point], dtype=np.int32), color=255))
     c=c+1
-os.chdir('D:/Belgeler/ders/jsonandmask/L4 Images/2020_02_22_FC120/masks')#geçerli çalışma dizinini verilen yola değiştirir
+os.chdir('C:/Users/aycaburcu/Desktop/Ford_Otosan_Intern/L4 Images/2020_02_22_FC120/masks')#geçerli çalışma dizinini verilen yola değiştirir
 #mask'lerin her birini masks klasörüne kaydetmek için yapıldı
 v=0
 for name in jsons:#her ann dosyasındaki json  dosyalarının  isimlerine ulaşmak için
