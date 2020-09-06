@@ -72,12 +72,13 @@ img_size =[img_height,img_width]#image'in height ve width bir listeye atadık
 
 print("Toplam json dosya sayisi:", len(json_objs))
 print("Goruntunun yuksekligi ve genisligi:", img_size)
-print(two_fs)
 
+#birden fazla freespace içeren json dosyalarının isimlerini almak için 
 two_fs_files=[]
 for i in two_fs:
     two_fs_files.append(jsons[i])
 print("/nBirden fazla fs içeren dosyalar: ", two_fs_files)
+
 masks=(np.zeros(img_size, dtype=np.uint8))#boş bir maske oluşturduk 
 
 results=[]
