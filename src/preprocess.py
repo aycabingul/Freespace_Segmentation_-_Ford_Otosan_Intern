@@ -6,7 +6,6 @@ import torch
 import tqdm 
 
 
-
 IMAGE_DIR="/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/data/images"
 MASK_DIR="/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/data/masks"
 batch_images=[]
@@ -35,8 +34,8 @@ tensorize_image(image_path,output_shape)
 batch_masks=[]
 def tensorize_mask(mask_path,output_shape):
     for mask in tqdm.tqdm(mask_path):
-        mask=cv2.imread(mask)
-        mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
+        mask=cv2.imread(mask,0)
+        #mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
         res_mask = cv2.resize(mask, tuple(output_shape))
         n_classes=2
         one_hot = np.zeros((300, 300, n_classes))
