@@ -24,20 +24,22 @@ for name in os.listdir(MASK_DIR):
 output_shape=[300,300]
 
 def tensorize_image(image_path,output_shape):#2 parametreli fonksiyon oluşturuldu
+    global tensor_image
     for image in tqdm.tqdm(image_path):#for döngüsü ile image_path listesinin içindeki elemanlara tek tek ulaşıldı
         img=cv2.imread(image)#image değişkenine atanmış dosya yolundaki,dosya okundu
         res=cv2.resize(img,tuple(output_shape))#image'a resize işlemi uygulandı 
         batch_images.append(res)#resize değiştirilmiş resimler listeye kaydedildi
     
-    tensor_image = torch.as_tensor(batch_images)#yukarıda oluşturulan liste torch tensor'e çevrildi
+    tensor_image=torch.as_tensor(batch_images)#yukarıda oluşturulan liste torch tensor'e çevrildi
+    return tensor_image
     
-    return tensor_image# tensor geri döndürüldü başka biryerde kullanmak için
+    #return tensor_image# tensor geri döndürüldü başka biryerde kullanmak için
 
 
 batch_masks=[]#boş liste oluşturuldu
 
 def tensorize_mask(mask_path,output_shape):#iki parametreye sahip function oluşturuldu
-    
+    global tensor_mask
     for mask in tqdm.tqdm(mask_path):#mask_path listesinin elemanlarına tek tek ulaşıldı
         mask=cv2.imread(mask,0)#dosyalar okundu 
         #buradaki bir değişiklik (HXW) okundu 
@@ -55,13 +57,16 @@ def tensorize_mask(mask_path,output_shape):#iki parametreye sahip function oluş
         batch_masks.append(one_hot)#her image'in one hot encode çevrilmiş hali listeye kaydedilir 
     
     tensor_mask=torch.as_tensor(batch_masks)#batch_masks torch tensore çevrildi
+    return tensor_mask
     
-    return tensor_mask#tensor geri döndürüldü tekrar kullanım için 
+    #return tensor_mask#tensor geri döndürüldü tekrar kullanım için 
 
 
 tensorize_image(image_path,output_shape)#fonksiyon çağrıldı
 
 tensorize_mask(mask_path,output_shape)#function çağrıldı 
 
+tensor_mask.size()
 
+tensor_mask.size()
 
