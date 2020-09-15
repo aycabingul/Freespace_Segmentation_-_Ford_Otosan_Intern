@@ -16,8 +16,7 @@ if not os.path.exists(MASK_DIR):#böyle bir dosya yolunda dosya yoksa
     os.mkdir(MASK_DIR)#böyle bir dosya yolu olan dosya oluşturuyor
 
 
-os.chdir('/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/data/jsons')#geçerli çalışma dizinini verilen yola değiştirir
-jsons=os.listdir()#ann klasörü içindeki json dosyalarının isimleriyle liste oluşturuldu
+jsons=os.listdir('/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/data/jsons')#ann klasörü içindeki json dosyalarının isimleriyle liste oluşturuldu
 
 
 JSON_DIR = '/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/data/jsons'#dosyanın yolu değişkene atandı
