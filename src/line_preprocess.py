@@ -58,11 +58,11 @@ def tensorize_mask(mask_path,output_shape,n_classes):#iki parametreye sahip func
 def one_hot_encoder(res_mask,n_classes):
     
     #one hot encode
-    #birtane np arrayi oluşturuyoruz sıfırlardan oluşan (224,224,2)'lik
+    #birtane np arrayi oluşturuyoruz sıfırlardan oluşan (224,224,3)'luk
     one_hot=np.zeros((res_mask.shape[0],res_mask.shape[1],n_classes),dtype=np.int)
-    #res_mask içerisindeki eşsiz değerleri bulduk[0,1]
+    #res_mask içerisindeki eşsiz değerleri bulduk[0,1,2]
     #i'de liste'nin uzunluğu kadar artıcak 
-    #[0,1] listesi'nin içini dönerken her liste elemanı unique_value değişkenine veriliyor
+    #[0,1,2] listesi'nin içini dönerken her liste elemanı unique_value değişkenine veriliyor
     for i,unique_value in enumerate(np.unique(res_mask)):
         one_hot[:,:,i][res_mask==unique_value]=1
     return one_hot
