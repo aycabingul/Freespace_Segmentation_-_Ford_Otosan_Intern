@@ -8,7 +8,7 @@ import tqdm
 
 IMAGE_DIR="/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/data/image"
 #image klasörünün yolu değişkene atandı 
-MASK_DIR="/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/data/masks"
+MASK_DIR="/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/data/maskline"
 #masks klasörünün yolu değişkene atandı
 batch_images=[] #boş liste oluşturuldu
 image_path=[] #boş liste oluşturuldu
@@ -56,6 +56,7 @@ def tensorize_mask(mask_path,output_shape,n_classes):#iki parametreye sahip func
     return tensor_mask#tensor return  edildi 
 
 def one_hot_encoder(res_mask,n_classes):
+    
     #one hot encode
     #birtane np arrayi oluşturuyoruz sıfırlardan oluşan (224,224,2)'lik
     one_hot=np.zeros((res_mask.shape[0],res_mask.shape[1],n_classes),dtype=np.int)
@@ -70,7 +71,7 @@ def one_hot_encoder(res_mask,n_classes):
 
 batch_image_tensor=tensorize_image(image_path,output_shape)#fonksiyon çağrıldı
 
-batch_mask_tensor=tensorize_mask(mask_path,output_shape,2)#function çağrıldı 
+batch_mask_tensor=tensorize_mask(mask_path,output_shape,3)#function çağrıldı 
 
 print(batch_image_tensor.shape)
 print(batch_image_tensor.dtype)
@@ -79,4 +80,7 @@ print(batch_image_tensor.type)
 print(batch_mask_tensor.shape)
 print(batch_mask_tensor.dtype)
 print(batch_mask_tensor.type)
+
+
+
 
