@@ -33,7 +33,7 @@ for maskname in tqdm.tqdm(masks_name):#masks_name listesi'nin tek tek elemanlar�
     opac_image=(img/2+cpy_img/2).astype(np.uint8)
     cv2.imwrite(os.path.join(result,maskname),opac_image)#yazdırıldı 
  
-    
+
 
 
 

@@ -6,54 +6,48 @@ import torch
 import tqdm 
 
 
-IMAGE_DIR="/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/data/image"
-#image klasörünün yolu değişkene atandı 
-MASK_DIR="/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/data/masks"
-#masks klasörünün yolu değişkene atandı
-batch_images=[] #boş liste oluşturuldu
-image_path=[] #boş liste oluşturuldu
-for name in os.listdir(IMAGE_DIR):
-    image_path.append(os.path.join(IMAGE_DIR,name))
-#IMAGE_DIR yolundaki klasörün içindeki dosyaların isimleri bir listeye kaydedildi 
-
-mask_path=[] #boş bir liste oluşturuldu
-for name in os.listdir(MASK_DIR):
-    mask_path.append(os.path.join(MASK_DIR,name))
-#MASK_DIR yolundaki klasörün içindeki dosyaların isimleri bir yoluyla birleştirilerek bir listeye kaydedildi
-output_shape=[224,224]
-batch_masks=[]#boş liste oluşturuldu
 
 
-def tensorize_image(image_path,output_shape): #2 parametreli fonksiyon oluşturuldu
-    global tensor_image
+
+def tensorize_image(image_path,output_shape,cuda=False): #2 parametreli fonksiyon oluşturuldu
+    batch_images=[] #boş liste oluşturuldu
     for image in tqdm.tqdm(image_path[:4]): #for döngüsü ile image_path listesinin içindeki elemanlara tek tek ulaşıldı
         img=cv2.imread(image) #image değişkenine atanmış dosya yolundaki,dosya okundu
-        res=cv2.resize(img,tuple(output_shape)) #image'a resize işlemi uygulandı 
-        batch_images.append(res) #resize değiştirilmiş resimler listeye kaydedildi
+        img=cv2.resize(img,tuple(output_shape)) #image'a resize işlemi uygulandı 
+        torchlike_image = torchlike_data(img)
+        batch_images.append(torchlike_image) #resize değiştirilmiş resimler listeye kaydedildi
     image_torch=torch.as_tensor(batch_images,dtype=torch.float32)#yukarıda oluşturulan liste torch tensor'e çevrildi
-    tensor_image=image_torch.cuda()
-    print(tensor_image.size())
+    
+    
+    if cuda:
+        image_torch = image_torch.cuda()
+    return image_torch
+    print(image_torch.size())
     #[4765,300,300,3] 
-    return tensor_image #tensor return edildi
 
 
 
 
-def tensorize_mask(mask_path,output_shape,n_classes):#iki parametreye sahip function oluşturuldu
-    global tensor_mask
-    for mask in tqdm.tqdm(mask_path[:4]):#mask_path listesinin elemanlarına tek tek ulaşıldı
+def tensorize_mask(mask_path,output_shape,n_classes,cuda=False):#iki parametreye sahip function oluşturuldu
+    batch_masks=[]
+    for mask in tqdm.tqdm(mask_path):#mask_path listesinin elemanlarına tek tek ulaşıldı
         mask=cv2.imread(mask,0)#dosyalar okundu 
         #buradaki bir değişiklik (HXW) şeklinde okundu(siyah ,beyaz)
         #mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)    
-        res_mask = cv2.resize(mask, tuple(output_shape))#image'a resize işlemi uygulandı 
+        mask= cv2.resize(mask, tuple(output_shape))#image'a resize işlemi uygulandı 
         #one hot encode 
-        mask=one_hot_encoder(res_mask,n_classes)
-        batch_masks.append(mask)
+        mask=one_hot_encoder(mask,n_classes)
+        torchlike_mask = torchlike_data(mask)
+        batch_masks.append(torchlike_mask)
         mask_torch=torch.as_tensor(batch_masks)
-        tensor_mask=mask_torch.cuda()
-    print(tensor_mask.size())
+
+    
+    if cuda:
+        mask_torch=mask_torch.cuda()
+    return mask_torch
+    print(mask_torch.size())
     #[4765,300,300,2] 
-    return tensor_mask#tensor return  edildi 
+
 
 def one_hot_encoder(res_mask,n_classes):
     #one hot encode
@@ -66,17 +60,47 @@ def one_hot_encoder(res_mask,n_classes):
         one_hot[:,:,i][res_mask==unique_value]=1
     return one_hot
 
+def torchlike_data(data):
+    n_channels = data.shape[2]
+    torchlike_data = np.empty((n_channels, data.shape[0], data.shape[1]))
+    #bu ölçülerde bir dizi oluşturuyor 
+    for ch in range(n_channels):#liste'nin uzunluğu kadar ch sayısı üretir
+        torchlike_data[ch] = data[:,:,ch]#torchlike_data[0]=data[:,:,0] şeklinde eşitlenir
+        #data'nın içindeki veriler tek tek torchlike_data aktarılır
+    return torchlike_data
+
+#mask ismi ile image ismi uyuyormu ona bakıyor uymuyorsa uyarı çıkarıyor ekrana 
+def image_mask_check(image_path_list, mask_path_list):
+    for image_path, mask_path in zip(image_path_list, mask_path_list):
+        image_name = image_path.split('/')[-1].split('.')[0]
+        mask_name  = mask_path.split('/')[-1].split('.')[0]
+        assert image_name == mask_name, "Image and mask name does not match {} - {}".format(image_name, mask_name)
 
 
-batch_image_tensor=tensorize_image(image_path,output_shape)#fonksiyon çağrıldı
+if __name__ == '__main__':
+    output_shape=[224,224]
+    IMAGE_DIR="/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/data/image"
+    #image klasörünün yolu değişkene atandı 
+    MASK_DIR="/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/data/masks"
+    #masks klasörünün yolu değişkene atandı
+    image_path=[] #boş liste oluşturuldu
+    for name in os.listdir(IMAGE_DIR):
+        image_path.append(os.path.join(IMAGE_DIR,name))
+    batch_image_list=image_path[:4]
+    batch_image_tensor=tensorize_image(batch_image_list,output_shape)#fonksiyon çağrıldı
+    
+    #IMAGE_DIR yolundaki klasörün içindeki dosyaların isimleri bir listeye kaydedildi 
+    
+    mask_path=[] #boş bir liste oluşturuldu
+    for name in os.listdir(MASK_DIR):
+        mask_path.append(os.path.join(MASK_DIR,name))
+    batch_mask_list=mask_path[:4]
+    batch_mask_tensor=tensorize_mask(batch_mask_list,output_shape,2)#function çağrıldı 
+    #MASK_DIR yolundaki klasörün içindeki dosyaların isimleri bir yoluyla birleştirilerek bir listeye kaydedildi
 
-batch_mask_tensor=tensorize_mask(mask_path,output_shape,2)#function çağrıldı 
 
-print(batch_image_tensor.shape)
-print(batch_image_tensor.dtype)
-print(batch_image_tensor.type)
 
-print(batch_mask_tensor.shape)
-print(batch_mask_tensor.dtype)
-print(batch_mask_tensor.type)
+
+
+
 
