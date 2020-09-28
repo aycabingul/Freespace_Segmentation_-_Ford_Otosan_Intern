@@ -1,5 +1,5 @@
 
-from model import FoInternNet
+from model1 import FoInternNet
 from preprocess import tensorize_image, tensorize_mask, image_mask_check# preprocess dosyası içindeki functionlar import edildi
 import os
 import glob
