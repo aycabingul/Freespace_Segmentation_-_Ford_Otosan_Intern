@@ -9,7 +9,7 @@ import numpy as np
 import cv2
 import json
 import os
-
+import tqdm
 #mask_dir'e mask dosyasının dosya yolunu yazdık
 MASK_DIR  = '/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/data/masks'
 if not os.path.exists(MASK_DIR):#böyle bir dosya yolunda dosya yoksa 
@@ -20,7 +20,7 @@ jsons=os.listdir('/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/data/jsons')#ann
 
 
 JSON_DIR = '/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/data/jsons'#dosyanın yolu değişkene atandı
-for json_name in jsons:#json listesinin içindeki elemanlara ulaşıldı
+for json_name in tqdm.tqdm(jsons):#json listesinin içindeki elemanlara ulaşıldı
     json_path = os.path.join(JSON_DIR, json_name)#okunacak dosya yolu birleştirildi
     json_file = open(json_path, 'r')#dosya okuma işlemi
     json_dict=json.load(json_file)#json dosyasının içindekiler dict veri tipine çevrildi

@@ -6,6 +6,7 @@ import glob
 import numpy as np
 import torch.nn as nn
 import torch.optim as optim
+import tqdm
 
 ######### PARAMETERS ##########
 valid_size = 0.3#Validation dataset belirli bir modeli değerlendirmek için kullanılır, ancak bu sık değerlendirme içindir. 
@@ -21,8 +22,8 @@ n_classes = 2
 SRC_DIR = os.getcwd()#yöntem bize geçerli çalışma dizininin (CWD) konumunu söyler.
 ROOT_DIR = os.path.join(SRC_DIR, '..')
 DATA_DIR = os.path.join(ROOT_DIR, 'data')
-IMAGE_DIR = os.path.join(DATA_DIR, 'image')steps_per_epoch = len(train_input_path_list)//batch_size
 MASK_DIR = os.path.join(DATA_DIR, 'masks')
+IMAGE_DIR = os.path.join(DATA_DIR, 'image')
 ###############################
 
 
@@ -81,6 +82,7 @@ criterion = nn.BCELoss()#Hedef ve çıktı arasındaki İkili Çapraz Entropiyi 
 #BCELoss, yalnızca iki kategorili problem için kullanılan BCOMoss CrossEntropyLoss'un özel bir durumu olan Binary CrossEntropyLoss'un kısaltmasıdır
 optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 #Genelde kullanılan momentum beta katsayısı 0.9'dur.
+#lr=learning rate
 
 # IF CUDA IS USED, IMPORT THE MODEL INTO CUDA
 if cuda:
@@ -88,20 +90,22 @@ if cuda:
 
 
 # TRAINING THE NEURAL NETWORK
-for epoch in range(epochs):
+for epoch in tqdm.tqdm(range(epochs)):
     running_loss = 0
     for ind in range(steps_per_epoch):
         batch_input_path_list = test_input_path_list[batch_size*ind:batch_size*(ind+1)]
         batch_label_path_list = test_label_path_list[batch_size*ind:batch_size*(ind+1)]
         batch_input = tensorize_image(batch_input_path_list, input_shape, cuda)#fonksiyonlar parametreleri girilerek değişkene atandı 
         batch_label = tensorize_mask(batch_label_path_list, input_shape, n_classes, cuda)
+        
+        optimizer.zero_grad()#gradyanı sıfırlar yoksa her yinelemede birikme oluşur
 
-        optimizer.zero_grad()
+        outputs = model(batch_input) # modele batch_inputu parametre olarak verip oluşan çıktıyı değişkene atadık 
 
-        outputs = model(batch_input)
-        loss = criterion(outputs, batch_label)
-        loss.backward()
-        optimizer.step()
+        # Forward passes the input data
+        loss = criterion(outputs, batch_label)#hedef ve çıktı arasındaki ikili çapraz entropiyi ölçer 
+        loss.backward()# Gradyanı hesaplar, her bir parametrenin ne kadar güncellenmesi gerektiğini verir
+        optimizer.step()# Gradyana göre her parametreyi günceller
 
         running_loss += loss.item()
         print(ind)
@@ -117,3 +121,15 @@ for epoch in range(epochs):
                 break
 
             print('validation loss on epoch {}: {}'.format(epoch, val_loss))
+# zip:
+#letters = ['a', 'b', 'c']
+#numbers = [0, 1, 2]
+#for l, n in zip(letters, numbers):
+    #print(f'Letter: {l}')
+    #print(f'Number: {n}')
+# Letter: a
+# Number: 0
+# Letter: b
+# Number: 1
+# Letter: c
+# Number: 2
