@@ -1,5 +1,5 @@
 
-from model import FoInternNet
+from model1 import FoInternNet
 from preprocess import tensorize_image, tensorize_mask, image_mask_check# preprocess dosyası içindeki functionlar import edildi
 import os
 import glob
@@ -13,7 +13,7 @@ valid_size = 0.3#Validation dataset belirli bir modeli değerlendirmek için kul
 test_size  = 0.1#test edilecek verinin oranı 
 batch_size = 4#modelin aynı anda kaç veriyi işleyeceği anlamına gelmektedir.
 epochs = 20#Epoch(döngü) sayısı, eğitim sırasında tüm eğitim verilerinin ağa gösterilme sayısıdır.
-cuda = False
+cuda = True
 input_shape = (224, 224)#image hangi boyutta resize edilecek
 n_classes = 2
 ###############################
