@@ -1,5 +1,5 @@
 
-from model1 import FoInternNet
+from model import FoInternNet
 from preprocess import tensorize_image, tensorize_mask, image_mask_check# preprocess dosyası içindeki functionlar import edildi
 import os
 import glob
@@ -93,12 +93,17 @@ if cuda:
 for epoch in tqdm.tqdm(range(epochs)):
     running_loss = 0
     for ind in range(steps_per_epoch):
-        batch_input_path_list = test_input_path_list[batch_size*ind:batch_size*(ind+1)]
-        batch_label_path_list = test_label_path_list[batch_size*ind:batch_size*(ind+1)]
+        batch_input_path_list = train_input_path_list[batch_size*ind:batch_size*(ind+1)]
+        #ilk girişte train_input_path_list[0:4] ilk 4 elemanı alır
+        #ikinci döngüde train_input_list[4:8] ikinci 4 elemanı alır 
+        #her seferinde batch_size kadar eleman ilerler
+        batch_label_path_list = train_label_path_list[batch_size*ind:batch_size*(ind+1)]
         batch_input = tensorize_image(batch_input_path_list, input_shape, cuda)#fonksiyonlar parametreleri girilerek değişkene atandı 
         batch_label = tensorize_mask(batch_label_path_list, input_shape, n_classes, cuda)
+        #preprocess kısmındaki modele sokucamız verilerimiz parametreler girilerek hazırlandı 
         
         optimizer.zero_grad()#gradyanı sıfırlar yoksa her yinelemede birikme oluşur
+        # Weights güncelledikten sonra gradientleri manuel olarak sıfırlayın
 
         outputs = model(batch_input) # modele batch_inputu parametre olarak verip oluşan çıktıyı değişkene atadık 
 
@@ -107,17 +112,19 @@ for epoch in tqdm.tqdm(range(epochs)):
         loss.backward()# Gradyanı hesaplar, her bir parametrenin ne kadar güncellenmesi gerektiğini verir
         optimizer.step()# Gradyana göre her parametreyi günceller
 
-        running_loss += loss.item()
+        running_loss += loss.item()# loss.item (), loss'da tutulan skaler değeri alır.
         print(ind)
+        #validation 
         if ind == steps_per_epoch-1:
+            #bir epoch bittiği zaman 
             print('training loss on epoch {}: {}'.format(epoch, running_loss))
             val_loss = 0
             for (valid_input_path, valid_label_path) in zip(valid_input_path_list, valid_label_path_list):
                 batch_input = tensorize_image([valid_input_path], input_shape, cuda)
                 batch_label = tensorize_mask([valid_label_path], input_shape, n_classes, cuda)
-                outputs = model(batch_input)
-                loss = criterion(outputs, batch_label)
-                val_loss += loss
+                outputs = model(batch_input)# modele batch_inputu parametre olarak verip oluşan çıktıyı değişkene atadık 
+                loss = criterion(outputs, batch_label)#hedef ve çıktı arasındaki ikili çapraz entropiyi ölçer 
+                val_loss += loss.item()
                 break
 
             print('validation loss on epoch {}: {}'.format(epoch, val_loss))
