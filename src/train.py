@@ -1,4 +1,4 @@
-
+from matplotlib import pyplot as plt
 from model1 import FoInternNet
 from preprocess import tensorize_image, tensorize_mask, image_mask_check# preprocess dosyası içindeki functionlar import edildi
 import os
@@ -7,13 +7,15 @@ import numpy as np
 import torch.nn as nn
 import torch.optim as optim
 import tqdm
+import matplotlib.ticker as mticker
+
 
 ######### PARAMETERS ##########
 valid_size = 0.3#Validation dataset belirli bir modeli değerlendirmek için kullanılır, ancak bu sık değerlendirme içindir. 
 test_size  = 0.1#test edilecek verinin oranı 
 batch_size = 4#modelin aynı anda kaç veriyi işleyeceği anlamına gelmektedir.
 epochs = 20#Epoch(döngü) sayısı, eğitim sırasında tüm eğitim verilerinin ağa gösterilme sayısıdır.
-cuda = True
+cuda =True
 input_shape = (224, 224)#image hangi boyutta resize edilecek
 n_classes = 2
 ###############################
@@ -88,9 +90,11 @@ optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 if cuda:
     model = model.cuda()
 
-
+val_losses=[]
+train_losses=[]
 # TRAINING THE NEURAL NETWORK
 for epoch in tqdm.tqdm(range(epochs)):
+
     running_loss = 0
     for ind in range(steps_per_epoch):
         batch_input_path_list = train_input_path_list[batch_size*ind:batch_size*(ind+1)]
@@ -106,6 +110,7 @@ for epoch in tqdm.tqdm(range(epochs)):
         # Weights güncelledikten sonra gradientleri manuel olarak sıfırlayın
 
         outputs = model(batch_input) # modele batch_inputu parametre olarak verip oluşan çıktıyı değişkene atadık 
+        
 
         # Forward passes the input data
         loss = criterion(outputs, batch_label)#hedef ve çıktı arasındaki ikili çapraz entropiyi ölçer 
@@ -113,10 +118,12 @@ for epoch in tqdm.tqdm(range(epochs)):
         optimizer.step()# Gradyana göre her parametreyi günceller
 
         running_loss += loss.item()# loss.item (), loss'da tutulan skaler değeri alır.
+
         print(ind)
         #validation 
         if ind == steps_per_epoch-1:
-            #bir epoch bittiği zaman 
+            
+            train_losses.append(running_loss)
             print('training loss on epoch {}: {}'.format(epoch, running_loss))
             val_loss = 0
             for (valid_input_path, valid_label_path) in zip(valid_input_path_list, valid_label_path_list):
@@ -125,9 +132,36 @@ for epoch in tqdm.tqdm(range(epochs)):
                 outputs = model(batch_input)# modele batch_inputu parametre olarak verip oluşan çıktıyı değişkene atadık 
                 loss = criterion(outputs, batch_label)#hedef ve çıktı arasındaki ikili çapraz entropiyi ölçer 
                 val_loss += loss.item()
+                val_losses.append(val_loss)
                 break
 
             print('validation loss on epoch {}: {}'.format(epoch, val_loss))
+            
+norm_validation = [float(i)/sum(val_losses) for i in val_losses]
+norm_train = [float(i)/sum(train_losses) for i in train_losses]
+epoch_numbers=list(range(1,21,1))
+plt.figure(figsize=(12,6))
+plt.subplot(2, 2, 1)
+plt.plot(epoch_numbers,norm_validation,color="red") 
+plt.gca().xaxis.set_major_locator(mticker.MultipleLocator(1))
+plt.title('Train losses')
+plt.subplot(2, 2, 2)
+plt.plot(epoch_numbers,norm_train,color="blue")
+plt.gca().xaxis.set_major_locator(mticker.MultipleLocator(1))
+plt.title('Validation losses')
+plt.subplot(2, 1, 2)
+plt.plot(epoch_numbers,norm_validation, 'r-',color="red")
+plt.plot(epoch_numbers,norm_train, 'r-',color="blue")
+plt.legend(['w=1','w=2'])
+plt.title('Train and Validation Losses')
+plt.gca().xaxis.set_major_locator(mticker.MultipleLocator(1))
+
+
+plt.show()
+
+
+
+
 # zip:
 #letters = ['a', 'b', 'c']
 #numbers = [0, 1, 2]
