@@ -144,4 +144,3 @@ class FoInternNet(nn.Module):#FoInternNet adında bir sınıf oluşturuldu
 
         return x
     
-

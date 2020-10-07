@@ -11,7 +11,7 @@ import tqdm
 
 def tensorize_image(image_path,output_shape,cuda=False): #2 parametreli fonksiyon oluşturuldu
     batch_images=[] #boş liste oluşturuldu
-    for image in image_path[:4]: #for döngüsü ile image_path listesinin içindeki elemanlara tek tek ulaşıldı
+    for image in image_path[:8]: #for döngüsü ile image_path listesinin içindeki elemanlara tek tek ulaşıldı
         img=cv2.imread(image) #image değişkenine atanmış dosya yolundaki,dosya okundu
         img=cv2.resize(img,tuple(output_shape)) #image'a resize işlemi uygulandı 
         torchlike_image = torchlike_data(img)
@@ -106,9 +106,5 @@ if __name__ == '__main__':
     print(batch_mask_tensor.dtype)
     print(type(batch_mask_tensor))
     print(batch_mask_tensor.shape)  
-
-
-
-
 
 

@@ -8,13 +8,15 @@ import torch.nn as nn
 import torch.optim as optim
 import tqdm
 import matplotlib.ticker as mticker
+import torch
+import cv2
 
 
 ######### PARAMETERS ##########
 valid_size = 0.3#Validation dataset belirli bir modeli değerlendirmek için kullanılır, ancak bu sık değerlendirme içindir. 
 test_size  = 0.1#test edilecek verinin oranı 
-batch_size = 4#modelin aynı anda kaç veriyi işleyeceği anlamına gelmektedir.
-epochs = 20#Epoch(döngü) sayısı, eğitim sırasında tüm eğitim verilerinin ağa gösterilme sayısıdır.
+batch_size = 8#modelin aynı anda kaç veriyi işleyeceği anlamına gelmektedir.
+epochs = 5#Epoch(döngü) sayısı, eğitim sırasında tüm eğitim verilerinin ağa gösterilme sayısıdır.
 cuda =True
 input_shape = (224, 224)#image hangi boyutta resize edilecek
 n_classes = 2
@@ -139,7 +141,7 @@ for epoch in tqdm.tqdm(range(epochs)):
             
 norm_validation = [float(i)/sum(val_losses) for i in val_losses]
 norm_train = [float(i)/sum(train_losses) for i in train_losses]
-epoch_numbers=list(range(1,21,1))
+epoch_numbers=list(range(1,6,1))
 plt.figure(figsize=(12,6))
 plt.subplot(2, 2, 1)
 plt.plot(epoch_numbers,norm_validation,color="red") 
@@ -160,6 +162,30 @@ plt.gca().xaxis.set_major_locator(mticker.MultipleLocator(1))
 plt.show()
 
 
+
+batch_input_path_list = test_input_path_list[3:4]
+batch_input = tensorize_image(batch_input_path_list, input_shape, cuda)
+outputs = model(batch_input)
+out=torch.argmax(outputs,axis=1)
+out_cpu = out.cpu()
+outputs_list=out_cpu.detach().numpy()
+mask=np.squeeze(outputs_list,axis=0)
+
+
+
+
+
+     
+img=cv2.imread('/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/data/image/cfc_000237.png')
+mg=cv2.resize(img,(224,224))
+plt.imshow(mg)
+mask_ind   = mask == 1
+cpy_img  = mg.copy()
+mg[mask==1 ,:] = (255, 0, 125)
+opac_image=(mg/2+cpy_img/2).astype(np.uint8)
+a=('/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/data/deneme/deneme1.png')
+cv2.imwrite(a,opac_image.astype(np.uint8))
+plt.imshow(mask)
 
 
 # zip:

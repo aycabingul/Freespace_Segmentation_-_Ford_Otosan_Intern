@@ -20,10 +20,11 @@ MASK_DIR = '/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/data/masks'
 #     cv2.imwrite(os.path.join(IMG_DIR,maskname),img)
 #     os.remove(os.path.join(IMG_DIR,maskname[:-4]+".jpg"))#png ile kaydedildikten sonra jpg olanlar silindi
 
-for maskname in tqdm.tqdm(masks_name):#masks_name listesi'nin tek tek elemanlarına ulaşıldı
+for maskname in tqdm.tqdm(masks_name[:4]):#masks_name listesi'nin tek tek elemanlarına ulaşıldı
 
     img=cv2.imread(os.path.join(IMG_DIR,maskname)).astype(np.uint8)
     mask=cv2.imread(os.path.join(MASK_DIR,maskname),0).astype(np.uint8)
+    
     mask_ind   = mask == 1
 
     cpy_img  = img.copy()
