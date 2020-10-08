@@ -140,61 +140,61 @@ for epoch in tqdm.tqdm(range(epochs)):
 
             print('validation loss on epoch {}: {}'.format(epoch, val_loss))
             
-# norm_validation = [float(i)/sum(val_losses) for i in val_losses]
-# norm_train = [float(i)/sum(train_losses) for i in train_losses]
-# epoch_numbers=list(range(1,2,1))
-# plt.figure(figsize=(12,6))
-# plt.subplot(2, 2, 1)
-# plt.plot(epoch_numbers,norm_validation,color="red") 
-# plt.gca().xaxis.set_major_locator(mticker.MultipleLocator(1))
-# plt.title('Train losses')
-# plt.subplot(2, 2, 2)
-# plt.plot(epoch_numbers,norm_train,color="blue")
-# plt.gca().xaxis.set_major_locator(mticker.MultipleLocator(1))
-# plt.title('Validation losses')
-# plt.subplot(2, 1, 2)
-# plt.plot(epoch_numbers,norm_validation, 'r-',color="red")
-# plt.plot(epoch_numbers,norm_train, 'r-',color="blue")
-# plt.legend(['w=1','w=2'])
-# plt.title('Train and Validation Losses')
-# plt.gca().xaxis.set_major_locator(mticker.MultipleLocator(1))
+torch.save(outputs, '/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/src/best_model.pth')
+print("Model Saved!")
+best_model = torch.load('/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/src/best_model.pth')
 
 
-# plt.show()
+norm_validation = [float(i)/sum(val_losses) for i in val_losses]
+norm_train = [float(i)/sum(train_losses) for i in train_losses]
+epoch_numbers=list(range(1,36,1))
+plt.figure(figsize=(12,6))
+plt.subplot(2, 2, 1)
+plt.plot(epoch_numbers,norm_validation,color="red") 
+plt.gca().xaxis.set_major_locator(mticker.MultipleLocator(1))
+plt.title('Train losses')
+plt.subplot(2, 2, 2)
+plt.plot(epoch_numbers,norm_train,color="blue")
+plt.gca().xaxis.set_major_locator(mticker.MultipleLocator(1))
+plt.title('Validation losses')
+plt.subplot(2, 1, 2)
+plt.plot(epoch_numbers,norm_validation, 'r-',color="red")
+plt.plot(epoch_numbers,norm_train, 'r-',color="blue")
+plt.legend(['w=1','w=2'])
+plt.title('Train and Validation Losses')
+plt.gca().xaxis.set_major_locator(mticker.MultipleLocator(1))
 
 
-
-
-
-
-
-for i in tqdm.tqdm(range(len(test_input_path_list))):
-    batch_test = test_input_path_list[i:i+1]
-    test_input = tensorize_image(batch_test, input_shape, cuda)
-    outs = model(test_input)
-    out=torch.argmax(outs,axis=1)
-    out_cpu = out.cpu()
-    outputs_list=out_cpu.detach().numpy()
-    mask=np.squeeze(outputs_list,axis=0)
-
-
-    img=cv2.imread(batch_test[0])
-    mg=cv2.resize(img,(224,224))
-    mask_ind   = mask == 1
-    cpy_img  = mg.copy()
-    mg[mask==1 ,:] = (255, 0, 125)
-    opac_image=(mg/2+cpy_img/2).astype(np.uint8)
-    predict_name=batch_test[0]
-    predict_path=predict_name.replace('image', 'predict')
-    cv2.imwrite(predict_path,opac_image.astype(np.uint8))
+plt.show()
 
 
 
 
+def predict(test_input_path_list):
+
+    for i in tqdm.tqdm(range(len(test_input_path_list[0]))):
+        batch_test = test_input_path_list[i:i+1]
+        test_input = tensorize_image(batch_test, input_shape, cuda)
+        outs = model(test_input)
+        out=torch.argmax(outs,axis=1)
+        out_cpu = out.cpu()
+        outputs_list=out_cpu.detach().numpy()
+        mask=np.squeeze(outputs_list,axis=0)
+            
+            
+        img=cv2.imread(batch_test[0])
+        mg=cv2.resize(img,(224,224))
+        mask_ind   = mask == 1
+        cpy_img  = mg.copy()
+        mg[mask==1 ,:] = (255, 0, 125)
+        opac_image=(mg/2+cpy_img/2).astype(np.uint8)
+        predict_name=batch_test[0]
+        predict_path=predict_name.replace('image', 'predict')
+        cv2.imwrite(predict_path,opac_image.astype(np.uint8))
+
+predict(test_input_path_list)
 
 
-
-     
 
 # zip:
 #letters = ['a', 'b', 'c']
