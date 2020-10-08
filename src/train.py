@@ -16,7 +16,7 @@ import cv2
 valid_size = 0.3#Validation dataset belirli bir modeli değerlendirmek için kullanılır, ancak bu sık değerlendirme içindir. 
 test_size  = 0.1#test edilecek verinin oranı 
 batch_size = 8#modelin aynı anda kaç veriyi işleyeceği anlamına gelmektedir.
-epochs = 5#Epoch(döngü) sayısı, eğitim sırasında tüm eğitim verilerinin ağa gösterilme sayısıdır.
+epochs = 1#Epoch(döngü) sayısı, eğitim sırasında tüm eğitim verilerinin ağa gösterilme sayısıdır.
 cuda =True
 input_shape = (224, 224)#image hangi boyutta resize edilecek
 n_classes = 2
@@ -28,6 +28,7 @@ ROOT_DIR = os.path.join(SRC_DIR, '..')
 DATA_DIR = os.path.join(ROOT_DIR, 'data')
 MASK_DIR = os.path.join(DATA_DIR, 'masks')
 IMAGE_DIR = os.path.join(DATA_DIR, 'image')
+
 ###############################
 
 
@@ -139,54 +140,61 @@ for epoch in tqdm.tqdm(range(epochs)):
 
             print('validation loss on epoch {}: {}'.format(epoch, val_loss))
             
-norm_validation = [float(i)/sum(val_losses) for i in val_losses]
-norm_train = [float(i)/sum(train_losses) for i in train_losses]
-epoch_numbers=list(range(1,6,1))
-plt.figure(figsize=(12,6))
-plt.subplot(2, 2, 1)
-plt.plot(epoch_numbers,norm_validation,color="red") 
-plt.gca().xaxis.set_major_locator(mticker.MultipleLocator(1))
-plt.title('Train losses')
-plt.subplot(2, 2, 2)
-plt.plot(epoch_numbers,norm_train,color="blue")
-plt.gca().xaxis.set_major_locator(mticker.MultipleLocator(1))
-plt.title('Validation losses')
-plt.subplot(2, 1, 2)
-plt.plot(epoch_numbers,norm_validation, 'r-',color="red")
-plt.plot(epoch_numbers,norm_train, 'r-',color="blue")
-plt.legend(['w=1','w=2'])
-plt.title('Train and Validation Losses')
-plt.gca().xaxis.set_major_locator(mticker.MultipleLocator(1))
+# norm_validation = [float(i)/sum(val_losses) for i in val_losses]
+# norm_train = [float(i)/sum(train_losses) for i in train_losses]
+# epoch_numbers=list(range(1,2,1))
+# plt.figure(figsize=(12,6))
+# plt.subplot(2, 2, 1)
+# plt.plot(epoch_numbers,norm_validation,color="red") 
+# plt.gca().xaxis.set_major_locator(mticker.MultipleLocator(1))
+# plt.title('Train losses')
+# plt.subplot(2, 2, 2)
+# plt.plot(epoch_numbers,norm_train,color="blue")
+# plt.gca().xaxis.set_major_locator(mticker.MultipleLocator(1))
+# plt.title('Validation losses')
+# plt.subplot(2, 1, 2)
+# plt.plot(epoch_numbers,norm_validation, 'r-',color="red")
+# plt.plot(epoch_numbers,norm_train, 'r-',color="blue")
+# plt.legend(['w=1','w=2'])
+# plt.title('Train and Validation Losses')
+# plt.gca().xaxis.set_major_locator(mticker.MultipleLocator(1))
 
 
-plt.show()
+# plt.show()
 
 
 
-batch_input_path_list = test_input_path_list[3:4]
-batch_input = tensorize_image(batch_input_path_list, input_shape, cuda)
-outputs = model(batch_input)
-out=torch.argmax(outputs,axis=1)
-out_cpu = out.cpu()
-outputs_list=out_cpu.detach().numpy()
-mask=np.squeeze(outputs_list,axis=0)
+
+
+
+
+for i in tqdm.tqdm(range(len(test_input_path_list))):
+    batch_test = test_input_path_list[i:i+1]
+    test_input = tensorize_image(batch_test, input_shape, cuda)
+    outs = model(test_input)
+    out=torch.argmax(outs,axis=1)
+    out_cpu = out.cpu()
+    outputs_list=out_cpu.detach().numpy()
+    mask=np.squeeze(outputs_list,axis=0)
+
+
+    img=cv2.imread(batch_test[0])
+    mg=cv2.resize(img,(224,224))
+    mask_ind   = mask == 1
+    cpy_img  = mg.copy()
+    mg[mask==1 ,:] = (255, 0, 125)
+    opac_image=(mg/2+cpy_img/2).astype(np.uint8)
+    predict_name=batch_test[0]
+    predict_path=predict_name.replace('image', 'predict')
+    cv2.imwrite(predict_path,opac_image.astype(np.uint8))
+
+
 
 
 
 
 
      
-img=cv2.imread('/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/data/image/cfc_000237.png')
-mg=cv2.resize(img,(224,224))
-plt.imshow(mg)
-mask_ind   = mask == 1
-cpy_img  = mg.copy()
-mg[mask==1 ,:] = (255, 0, 125)
-opac_image=(mg/2+cpy_img/2).astype(np.uint8)
-a=('/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/data/deneme/deneme1.png')
-cv2.imwrite(a,opac_image.astype(np.uint8))
-plt.imshow(mask)
-
 
 # zip:
 #letters = ['a', 'b', 'c']
