@@ -4,16 +4,19 @@ import json
 import os
 import torch
 import tqdm 
-
+from matplotlib import pyplot as plt
 
 
 
 
 def tensorize_image(image_path,output_shape,cuda=False): #2 parametreli fonksiyon oluşturuldu
+
     batch_images=[] #boş liste oluşturuldu
     for image in image_path[:8]: #for döngüsü ile image_path listesinin içindeki elemanlara tek tek ulaşıldı
         img=cv2.imread(image) #image değişkenine atanmış dosya yolundaki,dosya okundu
-        img=cv2.resize(img,tuple(output_shape)) #image'a resize işlemi uygulandı 
+        norm_img = np.zeros((1920,1208))
+        final_img = cv2.normalize(img,  norm_img, 0, 255, cv2.NORM_MINMAX)
+        img=cv2.resize(final_img,tuple(output_shape)) #image'a resize işlemi uygulandı 
         torchlike_image = torchlike_data(img)
         batch_images.append(torchlike_image) #resize değiştirilmiş resimler listeye kaydedildi
     torch_image=torch.as_tensor(batch_images,dtype=torch.float32).float()#yukarıda oluşturulan liste torch tensor'e çevrildi

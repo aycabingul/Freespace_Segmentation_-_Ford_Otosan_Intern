@@ -10,13 +10,14 @@ import tqdm
 import matplotlib.ticker as mticker
 import torch
 import cv2
-
+from skimage.transform import rotate, AffineTransform, warp
+from skimage.util import random_noise
 
 ######### PARAMETERS ##########
 valid_size = 0.3#Validation dataset belirli bir modeli değerlendirmek için kullanılır, ancak bu sık değerlendirme içindir. 
 test_size  = 0.1#test edilecek verinin oranı 
 batch_size = 8#modelin aynı anda kaç veriyi işleyeceği anlamına gelmektedir.
-epochs = 1#Epoch(döngü) sayısı, eğitim sırasında tüm eğitim verilerinin ağa gösterilme sayısıdır.
+epochs = 20#Epoch(döngü) sayısı, eğitim sırasında tüm eğitim verilerinin ağa gösterilme sayısıdır.
 cuda =True
 input_shape = (224, 224)#image hangi boyutta resize edilecek
 n_classes = 2
@@ -28,6 +29,8 @@ ROOT_DIR = os.path.join(SRC_DIR, '..')
 DATA_DIR = os.path.join(ROOT_DIR, 'data')
 MASK_DIR = os.path.join(DATA_DIR, 'masks')
 IMAGE_DIR = os.path.join(DATA_DIR, 'image')
+AUG_IMAGE=os.path.join(DATA_DIR,'augmentation')
+AUG_MASK=os.path.join(DATA_DIR,'augmentation_mask')
 
 ###############################
 
@@ -39,6 +42,19 @@ image_path_list.sort()
 mask_path_list = glob.glob(os.path.join(MASK_DIR, '*'))
 mask_path_list.sort()
 #MASK_DIR yolundaki dosyaların isimleri listeye eklendi ve bunlar sıralandı
+
+# PREPARE IMAGE AND MASK LISTS
+aug_path_list = glob.glob(os.path.join(AUG_IMAGE, '*'))
+aug_path_list.sort()
+#IMAGE_DIR yolundaki dosyaların isimleri listeye alındı ve bunlar sıralandı 
+aug_mask_path_list = glob.glob(os.path.join(AUG_MASK, '*'))
+aug_mask_path_list.sort()
+#MASK_DIR yolundaki dosyaların isimleri listeye eklendi ve bunlar sıralandı
+
+
+
+
+
 
 # DATA CHECK
 image_mask_check(image_path_list, mask_path_list)
@@ -69,8 +85,11 @@ train_label_path_list = mask_path_list[valid_ind:]#mask_path_list listesi'nin 19
 #burada yukarıda vermiş olduğumuz test verisi için tüm datanın 0.1 ve validation verisi tüm datanın 0.3 içermeli
 #ama ikiside aynı data verilerine ait olmaması için datamızı bu şekilde oranlarda böldük
 
+# train_input_path_list.extend(aug_path_list)
+# train_label_path_list.extend(aug_mask_path_list)
 
-# DEFINE STEPS PER EPOCH
+train_input_path_list=aug_path_list+train_input_path_list
+train_label_path_list=aug_mask_path_list+train_label_path_list
 #Tüm veri setinin sinir ağları boyunca bir kere gidip gelmesine(ağırlıkların güncellenmesi) epoch denir.
 steps_per_epoch = len(train_input_path_list)//batch_size
 # train verisinin(eğitim verisinin) uzunluğunu batch_size bölerek kaç kere  yapılacağı bulunur
@@ -144,35 +163,35 @@ torch.save(outputs, '/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/src/best_mode
 print("Model Saved!")
 best_model = torch.load('/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/src/best_model.pth')
 
+def draw_graf(val_losses,train_losses):
+    norm_validation = [float(i)/sum(val_losses) for i in val_losses]
+    norm_train = [float(i)/sum(train_losses) for i in train_losses]
+    epoch_numbers=list(range(1,21,1))
+    plt.figure(figsize=(12,6))
+    plt.subplot(2, 2, 1)
+    plt.plot(epoch_numbers,norm_validation,color="red") 
+    plt.gca().xaxis.set_major_locator(mticker.MultipleLocator(1))
+    plt.title('Train losses')
+    plt.subplot(2, 2, 2)
+    plt.plot(epoch_numbers,norm_train,color="blue")
+    plt.gca().xaxis.set_major_locator(mticker.MultipleLocator(1))
+    plt.title('Validation losses')
+    plt.subplot(2, 1, 2)
+    plt.plot(epoch_numbers,norm_validation, 'r-',color="red")
+    plt.plot(epoch_numbers,norm_train, 'r-',color="blue")
+    plt.legend(['w=1','w=2'])
+    plt.title('Train and Validation Losses')
+    plt.gca().xaxis.set_major_locator(mticker.MultipleLocator(1))
+    
+    
+    plt.show()
 
-norm_validation = [float(i)/sum(val_losses) for i in val_losses]
-norm_train = [float(i)/sum(train_losses) for i in train_losses]
-epoch_numbers=list(range(1,36,1))
-plt.figure(figsize=(12,6))
-plt.subplot(2, 2, 1)
-plt.plot(epoch_numbers,norm_validation,color="red") 
-plt.gca().xaxis.set_major_locator(mticker.MultipleLocator(1))
-plt.title('Train losses')
-plt.subplot(2, 2, 2)
-plt.plot(epoch_numbers,norm_train,color="blue")
-plt.gca().xaxis.set_major_locator(mticker.MultipleLocator(1))
-plt.title('Validation losses')
-plt.subplot(2, 1, 2)
-plt.plot(epoch_numbers,norm_validation, 'r-',color="red")
-plt.plot(epoch_numbers,norm_train, 'r-',color="blue")
-plt.legend(['w=1','w=2'])
-plt.title('Train and Validation Losses')
-plt.gca().xaxis.set_major_locator(mticker.MultipleLocator(1))
-
-
-plt.show()
-
-
+draw_graph(val_losses,train_losses)
 
 
 def predict(test_input_path_list):
 
-    for i in tqdm.tqdm(range(len(test_input_path_list[0]))):
+    for i in tqdm.tqdm(range(len(test_input_path_list))):
         batch_test = test_input_path_list[i:i+1]
         test_input = tensorize_image(batch_test, input_shape, cuda)
         outs = model(test_input)
@@ -195,6 +214,7 @@ def predict(test_input_path_list):
 predict(test_input_path_list)
 
 
+    
 
 # zip:
 #letters = ['a', 'b', 'c']
