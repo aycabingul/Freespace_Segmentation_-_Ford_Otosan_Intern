@@ -163,7 +163,7 @@ torch.save(outputs, '/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/src/best_mode
 print("Model Saved!")
 best_model = torch.load('/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/src/best_model.pth')
 
-def draw_graf(val_losses,train_losses):
+def draw_graph(val_losses,train_losses):
     norm_validation = [float(i)/sum(val_losses) for i in val_losses]
     norm_train = [float(i)/sum(train_losses) for i in train_losses]
     epoch_numbers=list(range(1,21,1))
