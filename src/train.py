@@ -17,7 +17,7 @@ from skimage.util import random_noise
 valid_size = 0.3#Validation dataset belirli bir modeli değerlendirmek için kullanılır, ancak bu sık değerlendirme içindir. 
 test_size  = 0.1#test edilecek verinin oranı 
 batch_size = 8#modelin aynı anda kaç veriyi işleyeceği anlamına gelmektedir.
-epochs = 20#Epoch(döngü) sayısı, eğitim sırasında tüm eğitim verilerinin ağa gösterilme sayısıdır.
+epochs = 25#Epoch(döngü) sayısı, eğitim sırasında tüm eğitim verilerinin ağa gösterilme sayısıdır.
 cuda =True
 input_shape = (224, 224)#image hangi boyutta resize edilecek
 n_classes = 2
@@ -88,9 +88,14 @@ train_label_path_list = mask_path_list[valid_ind:]#mask_path_list listesi'nin 19
 # train_input_path_list.extend(aug_path_list)
 # train_label_path_list.extend(aug_mask_path_list)
 
-train_input_path_list=aug_path_list+train_input_path_list
-train_label_path_list=aug_mask_path_list+train_label_path_list
+
+
+aug_size=int(len(aug_mask_path_list)/2)
+train_input_path_list=aug_path_list[:aug_size]+train_input_path_list+aug_path_list[aug_size:]
+train_label_path_list=aug_mask_path_list[:aug_size]+train_label_path_list+aug_mask_path_list[aug_size:]
 #Tüm veri setinin sinir ağları boyunca bir kere gidip gelmesine(ağırlıkların güncellenmesi) epoch denir.
+
+
 steps_per_epoch = len(train_input_path_list)//batch_size
 # train verisinin(eğitim verisinin) uzunluğunu batch_size bölerek kaç kere  yapılacağı bulunur
 #bir epoch içerisinde ,veri seti içerisindeki bir veri dizisi sinir ağlarında sona kadar gider
@@ -163,10 +168,10 @@ torch.save(outputs, '/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/src/best_mode
 print("Model Saved!")
 best_model = torch.load('/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/src/best_model.pth')
 
-def draw_graph(val_losses,train_losses):
+def draw_graph(val_losses,train_losses,epochs):
     norm_validation = [float(i)/sum(val_losses) for i in val_losses]
     norm_train = [float(i)/sum(train_losses) for i in train_losses]
-    epoch_numbers=list(range(1,21,1))
+    epoch_numbers=list(range(1,epochs+1,1))
     plt.figure(figsize=(12,6))
     plt.subplot(2, 2, 1)
     plt.plot(epoch_numbers,norm_validation,color="red") 
@@ -186,7 +191,7 @@ def draw_graph(val_losses,train_losses):
     
     plt.show()
 
-draw_graph(val_losses,train_losses)
+draw_graph(val_losses,train_losses,epochs)
 
 
 def predict(test_input_path_list):
