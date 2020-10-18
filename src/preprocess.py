@@ -10,7 +10,6 @@ from matplotlib import pyplot as plt
 
 
 def tensorize_image(image_path,output_shape,cuda=False): #2 parametreli fonksiyon oluşturuldu
-    
     batch_images=[] #boş liste oluşturuldu
     for image in image_path[:8]: #for döngüsü ile image_path listesinin içindeki elemanlara tek tek ulaşıldı
         img=cv2.imread(image) #image değişkenine atanmış dosya yolundaki,dosya okundu
@@ -33,7 +32,6 @@ def tensorize_image(image_path,output_shape,cuda=False): #2 parametreli fonksiyo
 
 def tensorize_mask(mask_path,output_shape,n_classes,cuda=False):#iki parametreye sahip function oluşturuldu
     batch_masks=[]
-    global mask
     for mask in mask_path:#mask_path listesinin elemanlarına tek tek ulaşıldı
         mask=cv2.imread(mask,0)#dosyalar okundu 
         #buradaki bir değişiklik (HXW) şeklinde okundu(siyah ,beyaz)
