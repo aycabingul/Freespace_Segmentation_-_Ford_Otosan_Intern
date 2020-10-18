@@ -1,6 +1,10 @@
-﻿## FREESPACE SEGMENTATION WITH FULLY CONVOLUTIONAL NEURAL NETWORKS
+## FREESPACE SEGMENTATION WITH FULLY CONVOLUTIONAL NEURAL NETWORKS
 In this project, we aim to detect drivable areas using python, pytorch, opencv etc. technologies.
 ### The result we will get at the end of the project;
+
+![result_gif](https://i.hizliresim.com/AEYGOw.gif)
+
+
 ![result](https://i.hizliresim.com/lTGPiq.jpg)
 ---
 ### Json to Mask
@@ -84,6 +88,8 @@ One Hot Encoder output;
 
 You can access the complete code in the [preprocess.py](src/preprocess.py) file.
 
+---
+
 ### Model
 
 <img src="https://developers.arcgis.com/assets/img/python-graphics/unet.png" width="500">
@@ -140,6 +146,8 @@ The softmax function is a function that turns a vector of K real values into a v
 
 
 You can find all the details about the model in the [model1.py](src/model1.py)  file.
+
+---
 
 ### Train the Model
 In this section, we will train the model we created in the previous section.
@@ -206,6 +214,8 @@ We will try to improve these values in the following sections.
 
 You can access the complete code in the [train.py](src/train.py) file.
 
+---
+
 ### Predict
 To see the predictions of the trained model, predict operation is performed with the test data set.
 The images in the test data set are converted to tensor. It is given to the model. And the outputs are converted to masks.
@@ -249,6 +259,8 @@ The model gave good results in bright and normal way, but the accuracy was low i
 
 
 Data Augmentation was implemented to prevent this situation.
+
+---
 
 ### Data Augmentation
 
