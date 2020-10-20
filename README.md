@@ -2,10 +2,11 @@
 In this project, we aim to detect drivable areas using python, pytorch, opencv etc. technologies.
 ### The result we will get at the end of the project;
 
-![result_gif](https://i.hizliresim.com/AEYGOw.gif)
+![result_gif](https://i.ibb.co/FYwJjZf/new-gif.gif)
 
 
 ![result](https://i.hizliresim.com/lTGPiq.jpg)
+
 ---
 ### Json to Mask
 As a result of labeled the images, we obtain json files.
