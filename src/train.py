@@ -123,6 +123,14 @@ train_losses=[]
 for epoch in tqdm.tqdm(range(epochs)):
 
     running_loss = 0
+    #her epochda image'leri sırayla vermemek için random bir şekilde image'ler ve mask'ler karıştırılır.
+    pair_IM=list(zip(train_input_path_list,train_label_path_list))
+    np.random.shuffle(pair_IM)
+    unzipped_object=zip(*pair_IM)
+    zipped_list=list(unzipped_object)
+    train_input_path_list=list(zipped_list[0])
+    train_label_path_list=list(zipped_list[1])
+    
     for ind in range(steps_per_epoch):
         batch_input_path_list = train_input_path_list[batch_size*ind:batch_size*(ind+1)]
         #ilk girişte train_input_path_list[0:4] ilk 4 elemanı alır
