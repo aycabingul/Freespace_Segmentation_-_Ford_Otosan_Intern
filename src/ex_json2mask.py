@@ -4,63 +4,64 @@ Created on Fri Sep  4 02:25:33 2020
 
 @author: aycaburcu
 """
-#kütüphaneleri import ettik 
+#Let's import the libraries
 import numpy as np
 import cv2
 import json
 import os
 
-#mask_dir'e mask dosyasının dosya yolunu yazdık
+#The path of the mask file has been written to mask_dir
+
 MASK_DIR  = '/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/data/masks'
-if not os.path.exists(MASK_DIR):#böyle bir dosya yolunda dosya yoksa 
-    os.mkdir(MASK_DIR)#böyle bir dosya yolu olan dosya oluşturuyor
+#If there is no file in the given file path, a new file is created
+if not os.path.exists(MASK_DIR):
+    os.mkdir(MASK_DIR)
 
 
-os.chdir('/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/data/jsons')#geçerli çalışma dizinini verilen yola değiştirir
-jsons=os.listdir()#ann klasörü içindeki json dosyalarının isimleriyle liste oluşturuldu
-
+os.chdir('/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/data/jsons')#replaces the current working directory with the given path
+jsons=os.listdir()#List created with names of json files in ann folder
 a=0
 json_objs=[]
 json_dicts=[]
 
-for i in jsons:#json listesinin içindeki elemanlara ulaşıldı
-    JSON_DIR = '/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/data/jsons'#dosyanın yolu değişkene atandı
-    json_name = i#jsons listesindeki her eleman değişkene atandı
-    json_path = os.path.join(JSON_DIR, json_name)#okunacak dosya yolu birleştirildi
-    json_file = open(json_path, 'r')#dosya okuma işlemi
-    json_dict=json.load(json_file)#json dosyasının içindekiler dict veri tipine çevrildi
-    json_dicts.append(json_dict)#her dict listeye eklendi
+for i in jsons:#The elements in the json list have been reached
+    JSON_DIR = '/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/data/jsons'
+    # file path assigned to variable
+    json_name = i  #Every element in the jsons list is assigned to the variable
+    json_path = os.path.join(JSON_DIR, json_name)
+    #Merged json_dir with json_name and created file path
+    json_file = open(json_path, 'r')#file reading process
+    json_dict=json.load(json_file)
+    #Contents of json file converted to dict data type
+    json_dicts.append(json_dict)#each dict added to list
     json_objs.append(json_dict["objects"])
-    # her bir json dosyasından elde ettiğimiz dict'lerin içerisindeki objects key'lerinin value'leri listeye eklendi
+    # The values of the object keys in the dicts that we obtained from each 	json file have been added to the list.
 point_list=[]
 list_id=[]
 two_fs=[]
-for json_obj in json_objs:#json_objs listesinin içindeki her listeye ulaşmak için
-    for obj in json_obj:#listenin içindeki elemanları dönmek için
+for json_obj in json_objs:#To access each list inside the json_objs list
+    for obj in json_obj:#to return the elements in the list
         obj_classtitle=obj['classTitle']
-        if obj_classtitle=='Freespace':#classtitle freespace olanları bulmak için
-            obj_points=obj['points']['exterior']#class title freespace olanların points'deki exteriorlarını aldık
-            point_list.append(obj_points)#bunları bir listede birlestirdik
+        if obj_classtitle=='Freespace':#Objects whose classtitle is freespace
+            obj_points=obj['points']['exterior']
+            #The points and exterior information of these objects were obtained.
+            point_list.append(obj_points)#these are combined in a list
         else:
             continue
-        #freespace'in id'si =38
-        #id'si 38 olanların listede hangi indexde olduğunu buldum
-        #bu indexleri listeye kaydettim
+        #freespace id =38
+        #The index of those with 38 id found in the list
+        #these indexes are saved in the list
         for key, value in obj.items():
             if value==38:
                 list_id.append(json_objs.index(json_obj))
 
-#iki tane freespace olanların freespace'leri peş peşe kaydedildiği için 
-#peş peşe aynı indexleri yazdırmış olduk
-#peş peşe aynı index olan indexleri buldum 
-#bunları bir listeye atadım
-for i in range(4767):#4768 tane list_id içinde eleman var ama 0.indexden başladığı için 4767 alıyorum
+#Since the freespaces of those with two freespaces were registered one after the other, the same indexes were printed one after the other. Indexes with the same index were found one after the other and they were assigned to a list
+for i in range(4767):#There are 4768 elements in list_id, but since it starts from index 0, 4767 was received.
     if(list_id[i]==list_id[i+1]):
         two_fs.append(list_id[i])
 
 two_point=[]
-# iki tane freespace'de ilkini bulup, ilk freespace'leri obj_point listesinden silip
-#başka bir listeye exterior'larını kaydettim
+# find the first one in two freespaces, delete the first freespaces from the obj_point list and save the exteriors to another list
 for fs in two_fs:
     two_point.append(point_list[fs])
     del point_list[fs]
@@ -68,37 +69,36 @@ two_fs
     
 img_height = json_dict["size"]["height"]
 img_width  = json_dict["size"]["width"]
-img_size =[img_height,img_width]#image'in height ve width bir listeye atadık
+img_size =[img_height,img_width]#image's height and width information assigned to a list
 
 print("Toplam json dosya sayisi:", len(json_objs))
 print("Goruntunun yuksekligi ve genisligi:", img_size)
 
-#birden fazla freespace içeren json dosyalarının isimlerini almak için 
+#to get names of json files containing multiple freespaces
 two_fs_files=[]
 for i in two_fs:
     two_fs_files.append(jsons[i])
 print("\nBirden fazla fs içeren dosyalar: ", two_fs_files)
 two_fs
-masks=(np.zeros(img_size, dtype=np.uint8))#boş bir maske oluşturduk 
+masks=(np.zeros(img_size, dtype=np.uint8))#create an empty mask
 
 results=[]
-for point in point_list:#point_liste'sinin her bir elemanına ulaşmak için 
-    mask=masks.copy()#boş maskeyi her image için kullanmak için kopyaladık
+for point in point_list:#To reach each element of the point_list
+    mask=masks.copy()#copy blank mask to use for each image
     results.append(cv2.fillPoly(mask, np.array([point], dtype=np.int32), color=255))
-    #boş maskeyi her image'ın exteriorları ile doldurduk 
+    #fill the blank mask with the exteriors of each image
 
 c=0
 for point in two_point:
-    #üstte boş maskenin üzerine yazıyorduk normalde
-    mask=results[two_fs[c]]#burada daha önceden freespace dolu olan maske'nin üzerine
-    #ikinci freespace yazdırıp
-    # result'ı güncelledim
+    #above it was writing on the blank mask
+    mask=results[two_fs[c]]
+    #here print a second freespace on the mask that was previously full of freespace and update the result
     results[two_fs[c]]=(cv2.fillPoly(mask, np.array([point], dtype=np.int32), color=255))
     c=c+1
-os.chdir('/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/data/masks')#geçerli çalışma dizinini verilen yola değiştirir
-#mask'lerin her birini masks klasörüne kaydetmek için yapıldı
+os.chdir('/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/data/masks')
+#save each of the masks in the masks folder
 v=0
-for name in jsons:#her ann dosyasındaki json  dosyalarının  isimlerine ulaşmak için
+for name in jsons:
     cv2.imwrite(name[:-5], results[v])
-    #json dosyasının sonundaki .json kısmını keserek her maske'yi png formatına çevirdik
+    #Convert each mask to png format by cutting the .json part at the end of the json file
     v=v+1

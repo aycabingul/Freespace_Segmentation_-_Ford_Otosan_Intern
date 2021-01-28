@@ -10,30 +10,31 @@ import cv2
 import json
 import os
 import tqdm
-#mask_dir'e mask dosyasının dosya yolunu yazdık
+#Write the file path of the mask file to mask_dir
 MASK_DIR  = '/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/data/masks'
-if not os.path.exists(MASK_DIR):#böyle bir dosya yolunda dosya yoksa 
-    os.mkdir(MASK_DIR)#böyle bir dosya yolu olan dosya oluşturuyor
+#If there is no file in the given file path, a new file is created
+if not os.path.exists(MASK_DIR): 
+    os.mkdir(MASK_DIR)
 
 
-jsons=os.listdir('/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/data/jsons')#ann klasörü içindeki json dosyalarının isimleriyle liste oluşturuldu
+jsons=os.listdir('/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/data/jsons')#List created with names of json files in ann folder
 
 
-JSON_DIR = '/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/data/jsons'#dosyanın yolu değişkene atandı
-for json_name in tqdm.tqdm(jsons):#json listesinin içindeki elemanlara ulaşıldı
-    json_path = os.path.join(JSON_DIR, json_name)#okunacak dosya yolu birleştirildi
-    json_file = open(json_path, 'r')#dosya okuma işlemi
-    json_dict=json.load(json_file)#json dosyasının içindekiler dict veri tipine çevrildi
+JSON_DIR = '/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/data/jsons'#The path to the file is assigned to the variable
+for json_name in tqdm.tqdm(jsons):#access the elements in the json list
+    json_path = os.path.join(JSON_DIR, json_name)#Merged json_dir with json_name and created file path
+    json_file = open(json_path, 'r')#file reading process
+    json_dict=json.load(json_file)#Contents of json file converted to dict data type
     mask=np.zeros((json_dict["size"]["height"],json_dict["size"]["width"]), dtype=np.uint8)
     
     mask_path = os.path.join(MASK_DIR, json_name[:-5])
-    # her bir json dosyasından elde ettiğimiz dict'lerin içerisindeki objects key'lerinin value'leri listeye eklendi
+    # The values of the object keys in the dicts that we obtained from each 	json file have been added to the list.
     
-    for obj in json_dict["objects"]:# json_dict icindeki objects ulaşıldı 
+    for obj in json_dict["objects"]:# To access each list inside the json_objs list
     
-        if obj['classTitle']=='Freespace':#classTitle==Freespace olanlar bulundu 
+        if obj['classTitle']=='Freespace':#Objects whose classtitle is freespace
         
             cv2.fillPoly(mask,np.array([obj['points']['exterior']]),color=1)
-            #np.zeros ile olusturdugumuz maskler json dosyalarımızın icersindeki point'lerin konumlarıyla dolduruldu 
+            #Fill the masks created with np.zeros with the positions of the points in the json files.
             
-    cv2.imwrite(mask_path,mask.astype(np.uint8))#imwrite ile mask_path içerisine doldurulan maskeler yazdırıldı
+    cv2.imwrite(mask_path,mask.astype(np.uint8))#Print filled masks in mask_path with imwrite

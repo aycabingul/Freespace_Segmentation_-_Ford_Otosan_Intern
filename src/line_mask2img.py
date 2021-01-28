@@ -1,11 +1,11 @@
 
-#kütüphaneler import edildi
+#libraries imported
 import cv2 
 import os
 import numpy as np
 import tqdm
 
-#result yolunda bir dosya yoksa eğer o dosya oluşturuldu
+#If there is no file in the path result, create that file
 result='/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/data/resultline'
 if not os.path.exists(result):
     os.mkdir(result)
@@ -14,13 +14,13 @@ masks_name=os.listdir('/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/data/maskli
 
 MASK_DIR = '/home/aycaburcu/Masaüstü/Ford_Otosan_Intern/data/maskline'
 
-#png formatındaki img'ler png formatına çevrildi
+#Convert images in jpg format to png format
 # for maskname in tqdm.tqdm(masks_name):
 #     img=cv2.imread(os.path.join(IMG_DIR,maskname[:-4]+".jpg")).astype(np.uint8)
 #     cv2.imwrite(os.path.join(IMG_DIR,maskname),img)
-#     os.remove(os.path.join(IMG_DIR,maskname[:-4]+".jpg"))#png ile kaydedildikten sonra jpg olanlar silindi
+#     os.remove(os.path.join(IMG_DIR,maskname[:-4]+".jpg"))#Delete jpg after saving as png
 
-for maskname in tqdm.tqdm(masks_name):#masks_name listesi'nin tek tek elemanlarına ulaşıldı
+for maskname in tqdm.tqdm(masks_name):#Access individual elements of the masks_name list
 
     img=cv2.imread(os.path.join(IMG_DIR,maskname)).astype(np.uint8)
     mask=cv2.imread(os.path.join(MASK_DIR,maskname),0).astype(np.uint8)
@@ -32,7 +32,7 @@ for maskname in tqdm.tqdm(masks_name):#masks_name listesi'nin tek tek elemanlar�
     img[mask==2,:]=(38, 255, 255)
 
     opac_image=(img/2+cpy_img/2).astype(np.uint8)
-    cv2.imwrite(os.path.join(result,maskname),opac_image)#yazdırıldı 
+    cv2.imwrite(os.path.join(result,maskname),opac_image)#save
  
     
 

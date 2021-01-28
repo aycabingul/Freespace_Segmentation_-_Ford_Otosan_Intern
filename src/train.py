@@ -1,6 +1,6 @@
 from matplotlib import pyplot as plt
 from model1 import FoInternNet
-from preprocess import tensorize_image, tensorize_mask, image_mask_check# preprocess dosyası içindeki functionlar import edildi
+from preprocess import tensorize_image, tensorize_mask, image_mask_check#Functions in preprocess file were imported
 import os
 import glob
 import numpy as np
@@ -14,17 +14,17 @@ from skimage.transform import rotate, AffineTransform, warp
 from skimage.util import random_noise
 
 ######### PARAMETERS ##########
-valid_size = 0.3#Validation dataset belirli bir modeli değerlendirmek için kullanılır, ancak bu sık değerlendirme içindir. 
-test_size  = 0.1#test edilecek verinin oranı 
-batch_size = 8#modelin aynı anda kaç veriyi işleyeceği anlamına gelmektedir.
-epochs = 25#Epoch(döngü) sayısı, eğitim sırasında tüm eğitim verilerinin ağa gösterilme sayısıdır.
+valid_size = 0.3#Validation dataset is used to evaluate a particular model, but this is for frequent evaluation.
+test_size  = 0.1#rate of data to be tested
+batch_size = 8#it means how many data the model will process at the same time.
+epochs = 25#Epoch count is the number of times all training data is shown to the network during training.
 cuda =True
-input_shape = (224, 224)#image hangi boyutta resize edilecek
+input_shape = (224, 224)#What size will the image resize
 n_classes = 2
 ###############################
 
 ######### DIRECTORIES #########
-SRC_DIR = os.getcwd()#yöntem bize geçerli çalışma dizininin (CWD) konumunu söyler.
+SRC_DIR = os.getcwd()#The method tells us the location of the current working directory (CWD).
 ROOT_DIR = os.path.join(SRC_DIR, '..')
 DATA_DIR = os.path.join(ROOT_DIR, 'data')
 MASK_DIR = os.path.join(DATA_DIR, 'masks')
@@ -38,18 +38,15 @@ AUG_MASK=os.path.join(DATA_DIR,'augmentation_mask')
 # PREPARE IMAGE AND MASK LISTS
 image_path_list = glob.glob(os.path.join(IMAGE_DIR, '*'))
 image_path_list.sort()
-#IMAGE_DIR yolundaki dosyaların isimleri listeye alındı ve bunlar sıralandı 
+#The names of the files in the IMAGE_DIR path are listed and sorted
 mask_path_list = glob.glob(os.path.join(MASK_DIR, '*'))
 mask_path_list.sort()
-#MASK_DIR yolundaki dosyaların isimleri listeye eklendi ve bunlar sıralandı
 
 # PREPARE IMAGE AND MASK LISTS
 aug_path_list = glob.glob(os.path.join(AUG_IMAGE, '*'))
 aug_path_list.sort()
-#IMAGE_DIR yolundaki dosyaların isimleri listeye alındı ve bunlar sıralandı 
 aug_mask_path_list = glob.glob(os.path.join(AUG_MASK, '*'))
 aug_mask_path_list.sort()
-#MASK_DIR yolundaki dosyaların isimleri listeye eklendi ve bunlar sıralandı
 
 
 
@@ -58,32 +55,33 @@ aug_mask_path_list.sort()
 
 # DATA CHECK
 image_mask_check(image_path_list, mask_path_list)
-#mask_path_list ve image_path_list listesinde olan elemanların aynı olup olmadığı kontrol edildi
+#Checked whether the elements in mask_path_list and image_path_list list are the same.
 
 
 
 # SHUFFLE INDICES
 indices = np.random.permutation(len(image_path_list))
-#image_path_list'ın uzunluğu kadar random bir permütasyon dizisi osteps_per_epoch = len(train_input_path_list)//batch_sizeluşturulur 
+#A random array of permutations for the length of the image_path_list steps_per_epoch = len (train_input_path_list) // batch_size is created
 
 
 # DEFINE TEST AND VALID INDICES
-test_ind  = int(len(indices) * test_size)#indices uzunluğu ile test_size çarptık ve bunu int şeklinde bir değişkene atadık
+test_ind  = int(len(indices) * test_size)#Multiply indices length by test_size and assign it to an int-shaped variable
 valid_ind = int(test_ind + len(indices) * valid_size)
 
 # SLICE TEST DATASET FROM THE WHOLE DATASET
-test_input_path_list = image_path_list[:test_ind]#image_path_list listesi'nin  0'dan 476 kadar olan elemanlarını aldık
-test_label_path_list = mask_path_list[:test_ind]#mask_path_list listesi'nin  0'dan 476 kadar olan elemanlarını aldık
+test_input_path_list = image_path_list[:test_ind] #Get 0 to 476 elements of the image_path_list list
+test_label_path_list = mask_path_list[:test_ind]#Get 0 to 476 elements of the mask_path_list list
 
 # SLICE VALID DATASET FROM THE WHOLE DATASET
-valid_input_path_list = image_path_list[test_ind:valid_ind]#image_path_list listesi'nin  476'dan 1905'e kadar olan elemanlarını aldık
-valid_label_path_list = mask_path_list[test_ind:valid_ind]#mask_path_list listesi'nin  476'dan 1905'e kadar olan elemanlarını aldık
+valid_input_path_list = image_path_list[test_ind:valid_ind]#Get 476 to 1905 elements of the image_path_list list
+valid_label_path_list = mask_path_list[test_ind:valid_ind]#Get 476 to 1905 elements of the mask_path_list list
 
 # SLICE TRAIN DATASET FROM THE WHOLE DATASET
-train_input_path_list = image_path_list[valid_ind:]#image_path_list listesi'nin 1905'den son elemana kadar olan elemanlarını aldık
-train_label_path_list = mask_path_list[valid_ind:]#mask_path_list listesi'nin 1905'den son elemana kadar olan elemanlarını aldık
+train_input_path_list = image_path_list[valid_ind:]#Get the elements of the image_path_list list from 1905 to the last element
+train_label_path_list = mask_path_list[valid_ind:]#Get the elements of the mask_path_list list from 1905 to the last element
 #burada yukarıda vermiş olduğumuz test verisi için tüm datanın 0.1 ve validation verisi tüm datanın 0.3 içermeli
-#ama ikiside aynı data verilerine ait olmaması için datamızı bu şekilde oranlarda böldük
+#Here, for the test data we have given above, all the data should contain 0.1 and all the validation data should contain 0.3, 
+#but both of them do not belong to the same data data.
 
 # train_input_path_list.extend(aug_path_list)
 # train_label_path_list.extend(aug_mask_path_list)
@@ -93,24 +91,24 @@ train_label_path_list = mask_path_list[valid_ind:]#mask_path_list listesi'nin 19
 aug_size=int(len(aug_mask_path_list)/2)
 train_input_path_list=aug_path_list[:aug_size]+train_input_path_list+aug_path_list[aug_size:]
 train_label_path_list=aug_mask_path_list[:aug_size]+train_label_path_list+aug_mask_path_list[aug_size:]
-#Tüm veri setinin sinir ağları boyunca bir kere gidip gelmesine(ağırlıkların güncellenmesi) epoch denir.
+#One time rounding (updating of weights) of the entire data set through neural networks is called an epoch.
 
 
 steps_per_epoch = len(train_input_path_list)//batch_size
-# train verisinin(eğitim verisinin) uzunluğunu batch_size bölerek kaç kere  yapılacağı bulunur
-#bir epoch içerisinde ,veri seti içerisindeki bir veri dizisi sinir ağlarında sona kadar gider
-#daha sonra orada bekler batch size kadar veri sona ulaştıktan sonra hata oranı hesaplanır
-#bizim batch_size 4 olduğu için eğitim veri setini//4 e böldük
+# Find how many times to do it by dividing the length of the train data (training data) by batch_size
+#in an epoch, a data string in the dataset goes to the end in neural networks
+#It then waits there until the batch reaches you, the error rate is calculated after the data reaches the end
+#Divide the training data set by 4 since our batch_size is 4
 
 # CALL MODEL
 model = FoInternNet(input_size=input_shape, n_classes=2)
-#model'e parametreleri girilip çıktısı değişkene atandı 
+#Enter parameters into model and assign output to variable
 
 # DEFINE LOSS FUNCTION AND OPTIMIZER
-criterion = nn.BCELoss()#Hedef ve çıktı arasındaki İkili Çapraz Entropiyi ölçen bir kriter oluşturur:
-#BCELoss, yalnızca iki kategorili problem için kullanılan BCOMoss CrossEntropyLoss'un özel bir durumu olan Binary CrossEntropyLoss'un kısaltmasıdır
+criterion = nn.BCELoss()#Creates a criterion that measures the Binary Cross Entropy between target and output:
+#BCELoss is an acronym for Binary CrossEntropyLoss, a special case of BCOMoss CrossEntropyLoss used only for two categories of problems.
 optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
-#Genelde kullanılan momentum beta katsayısı 0.9'dur.
+#Commonly used momentum beta coefficient is 0.9.
 #lr=learning rate
 
 # IF CUDA IS USED, IMPORT THE MODEL INTO CUDA
@@ -123,7 +121,7 @@ train_losses=[]
 for epoch in tqdm.tqdm(range(epochs)):
 
     running_loss = 0
-    #her epochda image'leri sırayla vermemek için random bir şekilde image'ler ve mask'ler karıştırılır.
+    #In each epoch, images and masks are mixed randomly in order not to output images sequentially.
     pair_IM=list(zip(train_input_path_list,train_label_path_list))
     np.random.shuffle(pair_IM)
     unzipped_object=zip(*pair_IM)
@@ -133,26 +131,26 @@ for epoch in tqdm.tqdm(range(epochs)):
     
     for ind in range(steps_per_epoch):
         batch_input_path_list = train_input_path_list[batch_size*ind:batch_size*(ind+1)]
-        #ilk girişte train_input_path_list[0:4] ilk 4 elemanı alır
-        #ikinci döngüde train_input_list[4:8] ikinci 4 elemanı alır 
-        #her seferinde batch_size kadar eleman ilerler
+        #train_input_path_list [0: 4] gets first 4 elements on first entry
+        #in the second loop train_input_list [4: 8] gets the second 4 elements
+        #element advances each time until batch_size
         batch_label_path_list = train_label_path_list[batch_size*ind:batch_size*(ind+1)]
-        batch_input = tensorize_image(batch_input_path_list, input_shape, cuda)#fonksiyonlar parametreleri girilerek değişkene atandı 
+        batch_input = tensorize_image(batch_input_path_list, input_shape, cuda)
         batch_label = tensorize_mask(batch_label_path_list, input_shape, n_classes, cuda)
-        #preprocess kısmındaki modele sokucamız verilerimiz parametreler girilerek hazırlandı 
+        #Our data that we will insert into the model in the preprocess section is prepared by entering the parameters.
         
-        optimizer.zero_grad()#gradyanı sıfırlar yoksa her yinelemede birikme oluşur
-        # Weights güncelledikten sonra gradientleri manuel olarak sıfırlayın
+        optimizer.zero_grad()#gresets the radian otherwise accumulation occurs on each iteration
+        # Manually reset gradients after updating Weights
 
-        outputs = model(batch_input) # modele batch_inputu parametre olarak verip oluşan çıktıyı değişkene atadık 
+        outputs = model(batch_input) # Give the model batch_input as a parameter and assign the resulting output to the variable.
         
 
         # Forward passes the input data
-        loss = criterion(outputs, batch_label)#hedef ve çıktı arasındaki ikili çapraz entropiyi ölçer 
-        loss.backward()# Gradyanı hesaplar, her bir parametrenin ne kadar güncellenmesi gerektiğini verir
-        optimizer.step()# Gradyana göre her parametreyi günceller
+        loss = criterion(outputs, batch_label)
+        loss.backward()# Calculates the gradient, how much each parameter needs to be updated
+        optimizer.step()# Updates each parameter according to the gradient
 
-        running_loss += loss.item()# loss.item (), loss'da tutulan skaler değeri alır.
+        running_loss += loss.item()# loss.item () takes the scalar value held in loss.
 
         print(ind)
         #validation 
@@ -164,8 +162,8 @@ for epoch in tqdm.tqdm(range(epochs)):
             for (valid_input_path, valid_label_path) in zip(valid_input_path_list, valid_label_path_list):
                 batch_input = tensorize_image([valid_input_path], input_shape, cuda)
                 batch_label = tensorize_mask([valid_label_path], input_shape, n_classes, cuda)
-                outputs = model(batch_input)# modele batch_inputu parametre olarak verip oluşan çıktıyı değişkene atadık 
-                loss = criterion(outputs, batch_label)#hedef ve çıktı arasındaki ikili çapraz entropiyi ölçer 
+                outputs = model(batch_input)
+                loss = criterion(outputs, batch_label)
                 val_loss += loss.item()
                 val_losses.append(val_loss)
                 break
