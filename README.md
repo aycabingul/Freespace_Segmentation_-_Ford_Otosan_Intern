@@ -36,7 +36,7 @@ The pixels specified as freespace in mask are color-coded (255,0,125) on the ima
     img[mask==1 ,:] = (255, 0, 125)
 Mask on image example;
 
-![maskonimg](https://i.hizliresim.com/PHyAoe.jpg)
+![maskonimg](https://i.hizliresim.com/UmGq2T.png)
 
 You can access the complete code in the [mask_on_image.py](src/mask_on_image.py) file.
 
@@ -250,7 +250,7 @@ We do the opposite of what we do when converting mask to tensor, here to convert
 
 Predicted image;
 
-![predicted](https://i.hizliresim.com/HsdlUC.jpg)
+![predicted](https://i.hizliresim.com/mUAYGk.png)
 
 
 The model gave good results in bright and normal way, but the accuracy was low in dark images such as tunnels;
