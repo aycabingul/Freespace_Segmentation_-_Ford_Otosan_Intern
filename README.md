@@ -5,7 +5,7 @@ In this project, we aim to detect drivable areas using python, pytorch, opencv e
 ![result_gif](https://i.ibb.co/FYwJjZf/new-gif.gif)
 
 
-![result](https://i.hizliresim.com/lTGPiq.jpg)
+![result](https://i.hizliresim.com/PeAAhT.png)
 
 ---
 ### Json to Mask
