@@ -2,10 +2,10 @@
 In this project, we aim to detect drivable areas using python, pytorch, opencv etc. technologies.
 ### The result we will get at the end of the project;
 
-![result_gif](https://i.ibb.co/FYwJjZf/new-gif.gif)
+![result_gif](images/1.gif)
 
 
-![result](https://i.hizliresim.com/PeAAhT.png)
+![result](images/2.png)
 
 ---
 ### Json to Mask
@@ -14,7 +14,7 @@ These Json files contain the exterior point locations of the freespace class.
 In our annotation files, json files have the structure as in the following;
 
 
-![json](https://i.hizliresim.com/tFMgms.png)
+![json](images/3.png)
 
 It was determined which pixel belongs to which object.
 Json files were converted to mask images in order to determine the locations with freespace in the image.
@@ -24,7 +24,7 @@ The ***fillPoly*** function of the **cv2** library was used to draw a mask.
     cv2.fillPoly(mask,np.array([obj['points']['exterior']]),color=1)
 Mask example; 
 
-![mask](https://i.hizliresim.com/Ezwl4s.png)
+![mask](images/4.png)
 
 You can find the line by line explanations of the codes of this section from the [json2mask.py](src/json2mask.py) file.
 
@@ -36,7 +36,7 @@ The pixels specified as freespace in mask are color-coded (255,0,125) on the ima
     img[mask==1 ,:] = (255, 0, 125)
 Mask on image example;
 
-![maskonimg](https://i.hizliresim.com/UmGq2T.png)
+![maskonimg](images/5.png)
 
 You can access the complete code in the [mask_on_image.py](src/mask_on_image.py) file.
 
@@ -84,7 +84,7 @@ One Hot Encoding means binary representation of categorical variables. This proc
 		return one_hot
 	mask=one_hot_encoder(mask,n_classes)
 One Hot Encoder output; 
-![one_hot_encoder](https://i.hizliresim.com/xCZpyQ.jpg)
+![one_hot_encoder](images/6.png)
 
 
 You can access the complete code in the [preprocess.py](src/preprocess.py) file.
@@ -93,7 +93,7 @@ You can access the complete code in the [preprocess.py](src/preprocess.py) file.
 
 ### Model
 
-<img src="https://developers.arcgis.com/assets/img/python-graphics/unet.png" width="500">
+<img src="images/7.png" width="500">
 
 We used the U-Net model in this project. Because it is seen that U-Net model is used in many autonomous vehicle projects while searching for the best model for semantic segmentation.
 Semantic segmentation, also known as pixel-based classification, is an important task in which we classify each pixel of an image as belonging to a particular class.
@@ -107,7 +107,7 @@ The ability of U-net to work with very little data and no specific requirement o
 	    self.maxpool = nn.MaxPool2d(2)
 
 	 
-	 ![maxpool_gif](https://developers.google.com/machine-learning/practica/image-classification/images/maxpool_animation.gif)
+	 ![maxpool_gif](images/8.gif)
 
 
  - The decoder is the second half of the architecture. The goal is to semantically project the discriminative features (lower resolution) learnt by the encoder onto the pixel space (higher resolution) to get a dense classification. The decoder consists of **upsampling** and **concatenation** followed by regular convolution operations.
@@ -116,7 +116,7 @@ The ability of U-net to work with very little data and no specific requirement o
 	    self.upsample = nn.Upsample(scale_factor=2,mode='bilinear', align_corners=True)
 	    --
 	    x = torch.cat([x, conv2], dim=1)
-![upsampling_gif](https://qph.fs.quoracdn.net/main-qimg-a2afa892b7b37c37871701f374e4b5ad)
+![upsampling_gif](images/9.gif)
 
 
 
@@ -130,7 +130,7 @@ Relu was used as the activation function.
 
 	    nn.ReLU(inplace=True)
 
-<img src="https://miro.medium.com/max/1026/0*g9ypL5M3k-f7EW85.png" width="500">
+<img src="images/10.png" width="500">
 
 
 #### Batch Normalization
@@ -142,7 +142,7 @@ The softmax function is a function that turns a vector of K real values into a v
 
     x = nn.Softmax(dim=1)(x)
 
-![softmax](https://media.springernature.com/full/springer-static/image/art%3A10.1007%2Fs11277-018-5702-9/MediaObjects/11277_2018_5702_Fig4_HTML.gif)
+![softmax](images/11.png)
 
 
 
@@ -208,7 +208,7 @@ We test our model with the validation data set at the end of each epoch. Thus, t
 The above processes take place as many as the number of epochs. And the loss values are kept in a list. After the training is finished, a graph is drawn with these loss values.
 The resulting graphic;
 
-![graphic1](https://i.hizliresim.com/hgXaf6.jpg)
+![graphic1](images/12.png)
 
 
 We will try to improve these values in the following sections.
@@ -250,13 +250,13 @@ We do the opposite of what we do when converting mask to tensor, here to convert
 
 Predicted image;
 
-![predicted](https://i.hizliresim.com/mUAYGk.png)
+![predicted](images/13.png)
 
 
 The model gave good results in bright and normal way, but the accuracy was low in dark images such as tunnels;
 
 
-![tunnel](https://i.hizliresim.com/6IXczk.jpg)
+![tunnel](images/14.png)
 
 
 Data Augmentation was implemented to prevent this situation.
@@ -286,27 +286,27 @@ The replicated data was added to the train data set;
 Epoch number changed to 25.
 A few examples of new data added after these processes are applied;
 
-![augmentation](https://i.hizliresim.com/yWCi8U.jpg)
+![augmentation](images/15.png)
 
 
 The model was retrained with the duplicated train data set. New loss values and graph;
 
-![new_loss](https://i.hizliresim.com/o3MpQ5.jpg)
+![new_loss](images/16.png)
 
 
-![new_graph](https://i.hizliresim.com/bpXW5M.jpg)
+![new_graph](images/17.png)
 
 
 There is a good improvement in the results obtained after data augmentation;
 
-<img src="https://i.hizliresim.com/yEyKf2.jpg" width="350">
+<img src="images/18.png" width="350">
 
 
-<img src="https://i.hizliresim.com/g6Rw4p.jpg" width="350">
+<img src="images/19.png" width="350">
 
 
 
-![new3](https://i.hizliresim.com/IVxphu.jpg)
+![new3](images/20.png)
 
 
 
